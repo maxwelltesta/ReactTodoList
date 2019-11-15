@@ -1,26 +1,49 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react';
+import { BrowserRouter, Switch, Route } from 'react-router-dom';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
+import { firebaseConnect } from 'react-redux-firebase';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import Navbar from './components/navbar/Navbar.js';
+import RegisterScreen from './components/register_screen/RegisterScreen.js';
+import LoginScreen from './components/login_screen/LoginScreen.js';
+import HomeScreen from './components/home_screen/HomeScreen.js';
+import ListScreen from './components/list_screen/ListScreen.js';
+import DatabaseTester from './test/DatabaseTester'
+
+class App extends Component {
+  render() {
+    const { auth } = this.props;
+
+    // if auth is loaded then we render App.
+    // But if not then we doesn't render the one.
+    if (auth.isLoaded) {
+      return (
+        <BrowserRouter>
+          <div className="App">
+            <Navbar />
+            <Switch>
+              <Route exact path="/" component={HomeScreen} />
+              <Route path="/databaseTester" component={DatabaseTester} />
+              <Route path="/register" component={RegisterScreen} />
+              <Route path="/login" component={LoginScreen} />
+              <Route path="/todoList/:id" component={ListScreen} />
+              <Route path="/:any" component={HomeScreen} />
+            </Switch>
+          </div>
+        </BrowserRouter>
+      );
+    }
+
+    return null;
+  }
 }
 
-export default App;
+const mapStateToProps = state => ({
+  auth: state.firebase.auth,
+});
+
+export default compose(
+  firebaseConnect(),
+  connect(mapStateToProps),
+)(App);
