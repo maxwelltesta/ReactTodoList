@@ -3,7 +3,9 @@ import { Redirect } from 'react-router-dom'
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import ItemsList from './ItemsList.js'
-import { firestoreConnect } from 'react-redux-firebase';
+import { firestoreConnect, getFirebase } from 'react-redux-firebase';
+import { getFirestore } from 'redux-firestore';
+import { Link } from 'react-router-dom';
 
 class ListScreen extends Component {
     state = {
@@ -13,16 +15,22 @@ class ListScreen extends Component {
 
     handleChange = (e) => {
         const { target } = e;
+        const id = this.props.todoList.id;
 
         this.setState(state => ({
             ...state,
             [target.id]: target.value,
         }));
+
+        getFirestore().collection('todoLists').doc(id).update({
+            [target.id]: target.value
+        });
     }
 
     render() {
         const auth = this.props.auth;
         const todoList = this.props.todoList;
+
         if (!auth.uid) {
             return <Redirect to="/" />;
         }
@@ -31,14 +39,17 @@ class ListScreen extends Component {
             <div className="container white">
                 <h5 className="grey-text text-darken-3">Todo List</h5>
                 <div className="input-field">
-                    <label htmlFor="email">Name</label>
+                    <label htmlFor="name">Name</label>
                     <input className="active" type="text" name="name" id="name" onChange={this.handleChange} value={todoList.name} />
                 </div>
                 <div className="input-field">
-                    <label htmlFor="password">Owner</label>
+                    <label htmlFor="owner">Owner</label>
                     <input className="active" type="text" name="owner" id="owner" onChange={this.handleChange} value={todoList.owner} />
                 </div>
                 <ItemsList todoList={todoList} />
+                <div className="center-align">
+                    <Link to={"/todoList/" + todoList.id + "/item/"} className="btn-floating btn-large grey"><i class="material-icons">add</i></Link>
+                </div>
             </div>
         );
     }
