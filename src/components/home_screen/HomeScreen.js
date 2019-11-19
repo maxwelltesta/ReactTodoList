@@ -10,6 +10,11 @@ class HomeScreen extends Component {
     handleNewList = () => {
         const history = this.props.history;
         getFirestore().collection('todoLists').add({}).then((function(doc) {
+            getFirestore().collection('todoLists').doc(doc.id).set({
+                items: [],
+                name: '', 
+                owner: ''
+            })
             history.push("/todoList/" + doc.id);
         }))
     }

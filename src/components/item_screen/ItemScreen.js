@@ -3,13 +3,14 @@ import { Redirect } from 'react-router-dom'
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { firestoreConnect } from 'react-redux-firebase';
+import { getFirestore } from 'redux-firestore';
 
 class ItemScreen extends Component {
     state = {
-        description: '',
-        assigned_to: '',
-        due_date: '',
-        completed: false
+        description: this.props.todoItem !== undefined ? this.props.todoItem.description : "", 
+        assigned_to: this.props.todoItem !== undefined ? this.props.todoItem.assigned_to : "",
+        due_date: this.props.todoItem !== undefined ? this.props.todoItem.due_date : "",
+        completed: this.props.todoItem !== undefined ? this.props.todoItem.description : false
     }
 
     handleChange = (e) => {
@@ -20,9 +21,55 @@ class ItemScreen extends Component {
             [target.id]: target.value
         }));
     }
+    handleCancel = () => {
+        const history = this.props.history;
+        const listID = this.props.listID
+        history.push("/todoList/" + listID);
+    }
+
+    handleSumbit = () => {
+        const todoList = this.props.todoList;
+        const keyA = this.props.keyA;
+        const length = todoList.items.length
+        const history = this.props.history;
+        const listID = this.props.listID
+
+            let newItem = {
+                description: this.state.description ? this.state.description : "Default",
+                assigned_to: this.state.assigned_to ? this.state.assigned_to : "Default",
+                due_date: this.state.due_date ? this.state.assigned_to : "2000-01-01",
+                completed: this.state.completed,
+                key: keyA
+            }
+            const newItems = this.props.todoList.items;
+            if (length > keyA) {
+                newItems[keyA] = newItem;
+            }
+            else {
+                newItems.push(newItem);
+            }
+            getFirestore().collection('todoLists').doc(listID).update({
+                items: newItems
+            });
+            history.push("/todoList/" + listID);
+    }
 
     render() {
         const auth = this.props.auth;
+        const todoList = this.props.todoList;
+        const keyA = this.props.keyA;
+        const length = todoList.items.length
+        console.log(keyA);
+        /*
+        if (todoList.items.length > keyA) {
+            this.setState({
+                description: todoList.items[keyA].description,
+                assigned_to: todoList.items[keyA].assigned_to,
+                due_date: todoList.items[keyA].due_date,
+                completed: todoList.items[keyA].completed
+            })
+        }
+        */
         if (!auth.uid) {
             return <Redirect to="/" />;
         }
@@ -31,21 +78,29 @@ class ItemScreen extends Component {
             <div className="container white">
                 <div className="input-field">
                     <label htmlFor="description">Description</label>
-                    <input className="active" type="text" name="description" id="description" onChange={this.handleChange} value={1} />
+                    <input className="active" type="text" name="description" id="description" onChange={this.handleChange} defaultValue={length > keyA ? todoList.items[keyA].description : this.state.description} />
                 </div>
                 <div className="input-field">
                     <label htmlFor="assigned_to">Assigned To</label>
-                    <input className="active" type="text" name="assigned_to" id="assigned_to" onChange={this.handleChange} value={1} />
+                    <input className="active" type="text" name="assigned_to" id="assigned_to" onChange={this.handleChange} defaultValue={length > keyA ? todoList.items[keyA].assigned_to : this.state.assigned_to} />
                 </div>
                 <div className="input-field">
                     <label htmlFor="due_date">Due Date</label>
-                    <input className="active" type="text" class="datepicker" name="due_date" id="due_date" onChange={this.handleChange} value={1} />
+                    <input className="active" type="text" class="datepicker" name="due_date" id="due_date" onChange={this.handleChange} defaultValue={length > keyA ? todoList.items[keyA].due_date : this.state.due_date} />
                 </div>
                 <div className="input-field">
                     <label htmlFor="completed">Completed</label>
-                    <label>
-                        <input type="checkbox" class="filled-in" className="active" name="completed" id="completed" onChange={this.handleChange} checked={1} />
-                    </label>
+                    <p>
+                        <label>
+                            <input type="checkbox" class="filled-in" className="active" name="completed" id="completed" onChange={this.handleChange} checked={length > keyA ? todoList.items[keyA].completed : this.state.completed} />
+                        </label>
+                    </p>
+                </div>
+                <div className="input-field">
+                    <button type="submit" className="btn pink lighten-1 z-depth-0" onClick={this.handleSumbit}>Submit</button>
+                </div>
+                <div className="input-field">
+                    <button type="submit" className="btn pink lighten-1 z-depth-0" onClick={this.handleCancel}>Cancel</button>
                 </div>
             </div>
         );
@@ -53,16 +108,25 @@ class ItemScreen extends Component {
 }
 
 const mapStateToProps = (state, ownProps) => {
-  const { todoLists } = state.firestore.data;
+    const listID = ownProps.match.params.listID;
+    const keyA = ownProps.match.params.key;
+    console.log(keyA);
+    const { todoLists } = state.firestore.data;
+    const todoList = todoLists ? todoLists[listID] : null;
+    const todoItem = todoList.items[keyA];
 
-  return {
-    auth: state.firebase.auth,
+    return {
+      keyA,
+      todoItem,
+      listID,
+      todoList,
+      auth: state.firebase.auth
+    };
   };
-};
-
-export default compose(
-  connect(mapStateToProps),
-  firestoreConnect([
-    { collection: 'todoLists' },
-  ]),
-)(ItemScreen);
+  
+  export default compose(
+    connect(mapStateToProps),
+    firestoreConnect([
+      { collection: 'todoLists' },
+    ]),
+  )(ItemScreen);

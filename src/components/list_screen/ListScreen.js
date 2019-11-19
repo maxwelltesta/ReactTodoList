@@ -5,12 +5,18 @@ import { compose } from 'redux';
 import ItemsList from './ItemsList.js'
 import { firestoreConnect, getFirebase } from 'react-redux-firebase';
 import { getFirestore } from 'redux-firestore';
-import { Link } from 'react-router-dom';
 
 class ListScreen extends Component {
     state = {
         name: '',
         owner: '',
+    }
+
+    handleAddItem = () => {
+        const todoList = this.props.todoList.items;
+        const id = this.props.todoList.id;
+        const history = this.props.history;
+        history.push("/todoList/" + id + "/item/" + todoList.length);
     }
 
     handleChange = (e) => {
@@ -48,7 +54,7 @@ class ListScreen extends Component {
                 </div>
                 <ItemsList todoList={todoList} />
                 <div className="center-align">
-                    <Link to={"/todoList/" + todoList.id + "/item/"} className="btn-floating btn-large grey"><i class="material-icons">add</i></Link>
+                    <a className="btn-floating btn-large grey" onClick={this.handleAddItem}><i class="material-icons">add</i></a>
                 </div>
             </div>
         );
