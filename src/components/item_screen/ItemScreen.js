@@ -4,13 +4,15 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { firestoreConnect } from 'react-redux-firebase';
 import { getFirestore } from 'redux-firestore';
+import { Checkbox } from 'react-materialize';
+import DatePicker from 'react-materialize/lib/DatePicker';
 
 class ItemScreen extends Component {
     state = {
         description: this.props.todoItem !== undefined ? this.props.todoItem.description : "", 
         assigned_to: this.props.todoItem !== undefined ? this.props.todoItem.assigned_to : "",
         due_date: this.props.todoItem !== undefined ? this.props.todoItem.due_date : "",
-        completed: this.props.todoItem !== undefined ? this.props.todoItem.description : false
+        completed: this.props.todoItem !== undefined ? this.props.todoItem.completed : false
     }
 
     handleChange = (e) => {
@@ -37,7 +39,7 @@ class ItemScreen extends Component {
             let newItem = {
                 description: this.state.description ? this.state.description : "Default",
                 assigned_to: this.state.assigned_to ? this.state.assigned_to : "Default",
-                due_date: this.state.due_date ? this.state.assigned_to : "2000-01-01",
+                due_date: this.state.due_date ? this.state.due_date : "2000-01-01",
                 completed: this.state.completed,
                 key: keyA
             }
@@ -60,16 +62,6 @@ class ItemScreen extends Component {
         const keyA = this.props.keyA;
         const length = todoList.items.length
         console.log(keyA);
-        /*
-        if (todoList.items.length > keyA) {
-            this.setState({
-                description: todoList.items[keyA].description,
-                assigned_to: todoList.items[keyA].assigned_to,
-                due_date: todoList.items[keyA].due_date,
-                completed: todoList.items[keyA].completed
-            })
-        }
-        */
         if (!auth.uid) {
             return <Redirect to="/" />;
         }
@@ -89,12 +81,10 @@ class ItemScreen extends Component {
                     <input className="active" type="text" class="datepicker" name="due_date" id="due_date" onChange={this.handleChange} defaultValue={length > keyA ? todoList.items[keyA].due_date : this.state.due_date} />
                 </div>
                 <div className="input-field">
-                    <label htmlFor="completed">Completed</label>
-                    <p>
-                        <label>
-                            <input type="checkbox" class="filled-in" className="active" name="completed" id="completed" onChange={this.handleChange} checked={length > keyA ? todoList.items[keyA].completed : this.state.completed} />
-                        </label>
-                    </p>
+                    <div>
+                        <label htmlFor="completed">Completed</label>
+                        <Checkbox onChange={this.handleChange} filledIn={length > keyA ? todoList.items[keyA].completed : this.state.completed}/>
+                    </div>
                 </div>
                 <div className="input-field">
                     <button type="submit" className="btn pink lighten-1 z-depth-0" onClick={this.handleSumbit}>Submit</button>
