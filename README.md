@@ -1,12 +1,12 @@
 Todo List with React
 
-![Homescreen](https://imgur.com/UPkddbC)
+![Homescreen](https://i.imgur.com/UPkddbC.png)
 
-![List Screen](https://imgur.com/pUFbERJ)
+![List Screen](https://i.imgur.com/pUFbERJ.png)
 
-![Login Screen](https://imgur.com/5zbRILB)
+![Login Screen](https://i.imgur.com/5zbRILB.png)
 
-![Register Screen](https://imgur.com/cPw1dJ2)
+![Register Screen](https://i.imgur.com/cPw1dJ2.png)
 
 
 
